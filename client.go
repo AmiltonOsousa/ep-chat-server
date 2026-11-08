@@ -51,25 +51,25 @@ func main() {
 			continue
 		}
 
-		if texto == "\exit" {
+		if texto == "\\exit" {
 			fmt.Fprintln(conn, "EXIT")
 			break
-		} else if strings.HasPrefix(texto, "\changenick ") {
-			novo := strings.TrimSpace(strings.TrimPrefix(texto, "\changenick "))
+		} else if strings.HasPrefix(texto, "\\changenick ") {
+			novo := strings.TrimSpace(strings.TrimPrefix(texto, "\\changenick "))
 			fmt.Fprintln(conn, "CHANGENICK "+novo)
-		} else if strings.HasPrefix(texto, "\msg @") {
-			// \msg @apelido mensagem
-			resto := strings.TrimPrefix(texto, "\msg @")
+		} else if strings.HasPrefix(texto, "\\msg @") {
+			// \\msg @apelido mensagem
+			resto := strings.TrimPrefix(texto, "\\msg @")
 			partes := strings.SplitN(resto, " ", 2)
 			if len(partes) < 2 {
-				fmt.Println("uso: \msg @<apelido> <mensagem>")
+				fmt.Println("uso: \\msg @<apelido> <mensagem>")
 				continue
 			}
 			fmt.Fprintln(conn, "PRIV "+partes[0]+" "+partes[1])
-		} else if strings.HasPrefix(texto, "\msg ") {
-			fmt.Fprintln(conn, "MSG "+strings.TrimPrefix(texto, "\msg "))
+		} else if strings.HasPrefix(texto, "\\msg ") {
+			fmt.Fprintln(conn, "MSG "+strings.TrimPrefix(texto, "\\msg "))
 		} else {
-			fmt.Println("comando inválido. Use \msg, \changenick ou \exit")
+			fmt.Println("comando inválido. Use \\msg, \\changenick ou \\exit")
 		}
 	}
 	fmt.Fprintln(conn, "EXIT")
