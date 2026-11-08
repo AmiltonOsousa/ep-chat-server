@@ -26,7 +26,7 @@ func main() {
 	fmt.Fprintln(conn, "NICK "+nick)
 
 	// goroutine que imprime o que chega do servidor
-	fim := make(chan bool)
+	fim := make(chan bool, 1)
 	go func() {
 		for {
 			linha, err := servidor.ReadString('\n')
@@ -35,7 +35,9 @@ func main() {
 			}
 			fmt.Print(linha)
 		}
+		fmt.Println("Conexão encerrada.")
 		fim <- true
+		os.Exit(0)
 	}()
 
 	// lê o teclado e manda para o servidor
