@@ -26,6 +26,7 @@ func main() {
 
 	// avisa o servidor que é um bot
 	fmt.Fprintln(conn, "BOT Inversor")
+	fmt.Println("Bot @Inversor conectado. Mande \\msg @Inversor <texto> pelo cliente.")
 
 	servidor := bufio.NewReader(conn)
 	for {
@@ -36,7 +37,9 @@ func main() {
 		linha = strings.TrimSpace(linha)
 
 		// só reage a mensagens no formato: FROM apelido mensagem
+		// o resto (ex: aviso de apelido em uso) só é mostrado no console
 		if !strings.HasPrefix(linha, "FROM ") {
+			fmt.Println("Servidor: " + linha)
 			continue
 		}
 		partes := strings.SplitN(strings.TrimPrefix(linha, "FROM "), " ", 2)
@@ -53,4 +56,5 @@ func main() {
 
 		fmt.Fprintln(conn, "PRIV "+quem+" "+resposta)
 	}
+	fmt.Println("Conexão encerrada.")
 }
