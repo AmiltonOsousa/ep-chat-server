@@ -26,3 +26,28 @@ go run bot.go
 | `\exit` | sai do chat |
 
 Para usar o bot, mande uma mensagem privada: `\msg @Inversor ola`
+
+Texto digitado sem comando também é enviado como mensagem pública.
+
+## Protocolo (cliente/bot -> servidor)
+
+| Linha | Significado |
+|---|---|
+| `NICK <apelido>` | primeira linha de um usuário |
+| `BOT <apelido>` | primeira linha de um bot (servidor anuncia como `Bot @apelido`) |
+| `MSG <texto>` | mensagem pública |
+| `PRIV <apelido> <texto>` | mensagem privada |
+| `CHANGENICK <apelido>` | troca de apelido |
+| `EXIT` | sair |
+
+O servidor manda para os usuários linhas prontas para imprimir. Para os bots ele manda
+`FROM <apelido> <texto>`, que é mais fácil de separar.
+
+## Organização do servidor
+
+- cada cliente tem um canal exclusivo (`ch`) e uma goroutine `writer` que escreve no socket
+- `broadcast`: mensagens públicas e avisos (entrada, saída, troca de apelido), só para usuários
+- `tratarPrivadas`: mensagens privadas para usuários
+- `tratarBots`: mensagens privadas para bots
+- `tratarComandos`: troca de apelido
+- o mapa de clientes é protegido por um `sync.Mutex`
