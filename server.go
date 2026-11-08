@@ -96,7 +96,7 @@ func tratarComandos() {
 		c := cmd.cliente
 		mutex.Lock()
 		_, existe := clients[cmd.novo]
-		if existe || cmd.novo == "" {
+		if existe || cmd.novo == "" || strings.Contains(cmd.novo, " ") {
 			mutex.Unlock()
 			enviar(c, "Apelido inválido ou já em uso")
 			continue
