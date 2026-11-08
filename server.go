@@ -68,7 +68,8 @@ func tratarPrivadas() {
 			enviar(p.de, "Usuário @"+p.para+" não existe")
 			continue
 		}
-		fmt.Println("@" + p.de.nome() + " disse em privado para @" + p.para + ": " + p.texto)
+		// mesmo formato do enunciado, com o destinatário na frente para saber para quem foi
+		fmt.Println("[para @" + p.para + "] @" + p.de.nome() + " disse em privado: " + p.texto)
 		if dest.bot {
 			paraBots <- p // quem trata bot é outra goroutine
 		} else {
