@@ -32,9 +32,10 @@ func broadcast(msg string) {
 
 // manda mensagem privada para um cliente só
 func private(from *Client, to string, msg string) {
+	// o lock fica preso até enviar, assim o destinatário não fecha o canal no meio
 	mutex.Lock()
+	defer mutex.Unlock()
 	dest, ok := clients[to]
-	mutex.Unlock()
 	if !ok {
 		from.ch <- "Usuário @" + to + " não existe"
 		return
@@ -129,9 +130,9 @@ func handle(conn net.Conn) {
 	// saiu
 	mutex.Lock()
 	delete(clients, c.nick)
+	close(c.ch)
 	mutex.Unlock()
 	broadcast("Usuário @" + c.nick + " saiu")
-	close(c.ch)
 }
 
 func main() {
