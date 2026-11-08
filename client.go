@@ -20,9 +20,15 @@ func main() {
 	servidor := bufio.NewReader(conn)
 
 	// o usuário escolhe o apelido antes de entrar
-	fmt.Print("Digite seu apelido: ")
-	nick, _ := teclado.ReadString('\n')
-	nick = strings.TrimSpace(nick)
+	nick := ""
+	for nick == "" || strings.Contains(nick, " ") {
+		fmt.Print("Digite seu apelido (sem espaços): ")
+		lido, err := teclado.ReadString('\n')
+		if err != nil {
+			return
+		}
+		nick = strings.TrimPrefix(strings.TrimSpace(lido), "@")
+	}
 	fmt.Fprintln(conn, "NICK "+nick)
 
 	// goroutine que imprime o que chega do servidor
@@ -58,7 +64,7 @@ func main() {
 			novo := strings.TrimSpace(strings.TrimPrefix(texto, "\\changenick "))
 			fmt.Fprintln(conn, "CHANGENICK "+novo)
 		} else if strings.HasPrefix(texto, "\\msg @") {
-			// \\msg @apelido mensagem
+			// \msg @apelido mensagem
 			resto := strings.TrimPrefix(texto, "\\msg @")
 			partes := strings.SplitN(resto, " ", 2)
 			if len(partes) < 2 {
@@ -68,8 +74,11 @@ func main() {
 			fmt.Fprintln(conn, "PRIV "+partes[0]+" "+partes[1])
 		} else if strings.HasPrefix(texto, "\\msg ") {
 			fmt.Fprintln(conn, "MSG "+strings.TrimPrefix(texto, "\\msg "))
-		} else {
+		} else if strings.HasPrefix(texto, "\\") {
 			fmt.Println("comando inválido. Use \\msg, \\changenick ou \\exit")
+		} else {
+			// texto sem comando também é mensagem pública, para poder conversar normalmente
+			fmt.Fprintln(conn, "MSG "+texto)
 		}
 	}
 	fmt.Fprintln(conn, "EXIT")
