@@ -51,3 +51,7 @@ O servidor manda para os usuários linhas prontas para imprimir. Para os bots el
 - `tratarBots`: mensagens privadas para bots
 - `tratarComandos`: troca de apelido
 - o mapa de clientes é protegido por um `sync.Mutex`
+
+## Apresentação
+
+Slides com a explicação da implementação: `EP03-chat-server.pptx`.
