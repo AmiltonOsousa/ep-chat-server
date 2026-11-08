@@ -1,0 +1,92 @@
+package main
+
+import (
+	"bufio"
+	"fmt"
+	"net"
+	"strings"
+	"sync"
+)
+
+type Client struct {
+	conn net.Conn
+	nick string
+	ch   chan string // canal exclusivo do cliente
+}
+
+var clients = make(map[string]*Client)
+var mutex sync.Mutex
+
+// manda a mensagem para todos os clientes
+func broadcast(msg string) {
+	fmt.Println(msg)
+	mutex.Lock()
+	for _, c := range clients {
+		c.ch <- msg
+	}
+	mutex.Unlock()
+}
+
+// goroutine que escreve no socket tudo que chega no canal do cliente
+func writer(c *Client) {
+	for msg := range c.ch {
+		fmt.Fprintln(c.conn, msg)
+	}
+}
+
+func handle(conn net.Conn) {
+	defer conn.Close()
+	reader := bufio.NewReader(conn)
+
+	// primeira linha: NICK apelido
+	line, err := reader.ReadString('\n')
+	if err != nil {
+		return
+	}
+	line = strings.TrimSpace(line)
+	nick := strings.TrimSpace(strings.TrimPrefix(line, "NICK"))
+
+	c := &Client{conn: conn, nick: nick, ch: make(chan string, 100)}
+	mutex.Lock()
+	clients[nick] = c
+	mutex.Unlock()
+	go writer(c)
+
+	broadcast("Usuário @" + nick + " acabou de entrar")
+
+	for {
+		line, err := reader.ReadString('\n')
+		if err != nil {
+			break
+		}
+		line = strings.TrimSpace(line)
+		if strings.HasPrefix(line, "MSG ") {
+			broadcast("@" + c.nick + " disse: " + strings.TrimPrefix(line, "MSG "))
+		} else if line == "EXIT" {
+			break
+		}
+	}
+
+	// saiu
+	mutex.Lock()
+	delete(clients, c.nick)
+	mutex.Unlock()
+	broadcast("Usuário @" + c.nick + " saiu")
+	close(c.ch)
+}
+
+func main() {
+	ln, err := net.Listen("tcp", "localhost:4444")
+	if err != nil {
+		fmt.Println("erro:", err)
+		return
+	}
+	fmt.Println("Servidor rodando na porta 4444")
+	for {
+		conn, err := ln.Accept()
+		if err != nil {
+			continue
+		}
+		go handle(conn)
+	}
+}
