@@ -8,13 +8,15 @@ Três programas separados, todos em `localhost:4444`:
 
 ## Como rodar
 
-Em terminais diferentes:
+Precisa do Go instalado. Em terminais diferentes, nesta ordem:
 
 ```
 go run server.go
-go run client.go
 go run bot.go
+go run client.go
 ```
+
+O cliente pode ser aberto em vários terminais, um para cada usuário.
 
 ## Comandos do cliente
 
@@ -47,8 +49,8 @@ O servidor manda para os usuários linhas prontas para imprimir. Para os bots el
 
 - cada cliente tem um canal exclusivo (`ch`) e uma goroutine `writer` que escreve no socket
 - `broadcast`: mensagens públicas e avisos (entrada, saída, troca de apelido), só para usuários
-- `tratarPrivadas`: mensagens privadas para usuários
-- `tratarBots`: mensagens privadas para bots
+- `tratarPrivadas`: mensagens privadas; entrega para usuários, repassa para `tratarBots` se o destino for bot e avisa quem enviou se o apelido não existe
+- `tratarBots`: mensagens privadas para bots, no formato `FROM`
 - `tratarComandos`: troca de apelido
 - o mapa de clientes é protegido por um `sync.Mutex`
 
